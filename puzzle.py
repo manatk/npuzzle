@@ -29,21 +29,23 @@ def isValid(i,n):
     if len(i) != n:
         return False
 
-def debug_state(state, n):
+def debug_state(state):
+    n = int(math.sqrt(len(state)))
     row = ""
     n_count = 0
     for i in state:
-        row = row + str(i)
+        row = row + " " + str(i)
         if (n_count % n) == n-1:
             print(row)
             row = ""
         n_count = n_count + 1
 
-def compute_neighbors(state, n):
-    print(state)
+def compute_neighbors(state):
+    n = math.sqrt(len(state))
+    #print(state)
     index = state.index(int(0))
     neighbor_list = []
-    print("INDEX IS" , index)
+    #print("INDEX IS" , index)
 
     if index == 0:
         neighbor_list.append(swap(state, index, index+1))
@@ -90,16 +92,73 @@ def compute_neighbors(state, n):
     return neighbor_list
 
 def swap(state, index, pos2):
+    pos2 = int(pos2)
     temp = state[:]
     temp[index] = temp[pos2]
+    moved = temp[pos2]
     #print(temp[pos2])
     temp[pos2] = 0
-    return temp
+    return (moved, temp)
 
 def isGoal(state):
-    print(state)
-    goal = (sorted(state))
+    goal = list(range(1, len(state))) + [0]
+    #print(goal)
     return (state == goal)
+
+def backtrack(parents, end_state):
+    state = tuple(end_state)
+    backtrack = []
+    backtrack.append(end_state)
+    value = parents[tuple(state)]
+
+    while value != None:
+        backtrack.append(value)
+        value = parents[tuple(value)]
+
+    backtrack.reverse()
+    print("BACKTRACK IS" , backtrack)
+    return backtrack
+
+
+def BFS(state):
+    frontier = [(state)]
+    discovered = set(tuple(state))
+    parents = {tuple(state): None}
+    while len(frontier) != 0:
+        #print ("Fronter is ", frontier)
+        current_state = frontier.pop(0)
+        #(debug_state(current_state))
+        #print("")
+        discovered.add(tuple(current_state))
+        if isGoal(current_state) == True:
+            print("HERE")
+            return backtrack(parents, current_state)
+        for neighbor in compute_neighbors(current_state):
+            #print(neighbor)
+            if tuple(neighbor[1]) not in discovered:
+                frontier.append(neighbor[1])
+                discovered.add(tuple(neighbor[1]))
+                parents[tuple(neighbor[1])] = tuple(current_state)
+
+def DFS(state):
+    frontier = [(state)]
+    discovered = set(tuple(state))
+    parents = {tuple(state): None}
+    while len(frontier) != 0:
+        #print ("Fronter is ", frontier)
+        current_state = frontier.pop(0)
+        #(debug_state(current_state))
+        #print("")
+        discovered.add(tuple(current_state))
+        if isGoal(current_state) == True:
+            print("HERE")
+            return backtrack(parents, current_state)
+        for neighbor in compute_neighbors(current_state):
+            #print(neighbor)
+            if tuple(neighbor[1]) not in discovered:
+                frontier.insert(0, neighbor[1])
+                discovered.add(tuple(neighbor[1]))
+                parents[tuple(neighbor[1])] = tuple(current_state)
 
 def main():
     output = read_input()
@@ -109,9 +168,13 @@ def main():
     list = output[0]
     n = output[1]
     #check_type(list)
-    #debug_state(list, n)
-    print(compute_neighbors(list, n))
+    #debug_state(list)
+    #print(compute_neighbors(list))
     #isGoal(list)
+    #isGoal(list)
+    DFS(list)
+    BFS(list)
+
 
 if __name__ == "__main__":
     main()
